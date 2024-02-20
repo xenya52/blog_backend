@@ -30,10 +30,10 @@ async fn main() -> Result<(), Error> {
     // Execute a statement to create a new table
     client
         .execute(
-            "CREATE TABLE IF NOT EXISTS my_table (
+            "CREATE TABLE IF NOT EXISTS todo (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR NOT NULL,
-                data JSONB
+                description JSONB
             )",
             &[],
         )
