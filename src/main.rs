@@ -88,7 +88,7 @@ async fn drop_table(database_url:String) -> Result<(), Error> {
     println!("Table dropped successfully");
     Ok(())
 }
-async fn insert_table(database_url:String) -> Result<(), Error> {
+async fn insert_value_in_table(database_url:String) -> Result<(), Error> {
     // Connect to the database
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
@@ -112,6 +112,40 @@ async fn insert_table(database_url:String) -> Result<(), Error> {
         .await?;
     
     println!("Table dropped successfully");
+    Ok(())
+}
+async fn delete_value_in_todo_table(database_url: String) -> Result<(), Error> {
+    // Connect to the database
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    // The connection object performs the actual communication with the database,
+    // so spawn it off to run on its own.
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    // Fetch and display the results
+    let rows = client
+        .query(
+            "DELETE FROM todo
+            WHERE id=1",
+            &[],
+        )
+        .await?;
+
+    for row in rows {
+        let todo = Todo {
+            id: row.get(0),
+            name: row.get(1),
+            description: row.get(2),
+        };
+
+        // Print each Todo item
+        println!("{}", todo);
+    }
+
     Ok(())
 }
 async fn show_todo_table(database_url: String) -> Result<(), Error> {
@@ -152,7 +186,8 @@ async fn show_todo_table(database_url: String) -> Result<(), Error> {
 async fn main() -> Result<(), Error> {
     let url = get_database_url();
 
-    show_todo_table(url).await?;
+    insert_value_in_table(url.clone()).await?;
+    show_todo_table(url.clone()).await?;
 
     Ok(())
 }
