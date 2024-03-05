@@ -36,6 +36,57 @@ fn get_database_url() -> String {
     return database_url;
 }
 
+async fn todo_table_action(database_url:String, action: todo_table_action) -> Result<(), Error> {
+    // Connect to the database
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    //Test conection
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let mut executable_string: &str = "";
+    match action {
+        todo_table_action::show => executable_string = "
+        SELECT * FROM todo
+        ",
+        todo_table_action::insert => executable_string = "
+        INSERT INTO public.todo
+        (id, task_name, task_description)
+        VALUES(nextval('todo_id_seq'::regclass), 'test_header', 'test_description');
+        ",
+        todo_table_action::init => executable_string = "
+            CREATE TABLE IF NOT EXISTS todo (
+            id SERIAL PRIMARY KEY,
+            task_name VARCHAR NOT NULL,
+            task_description TEXT
+            )
+        ",
+        todo_table_action::drop => executable_string = "
+        ",
+        todo_table_action::merge => executable_string = "
+        ",
+        todo_table_action::update => executable_string =  "
+        ",
+        todo_table_action::delete => executable_string = "
+        "
+    }
+
+    // Execute a statement to create a new table
+    let result = client.execute(executable_string,
+            &[],
+        )
+        .await;
+    
+    match result {
+        Ok(_) => println!("Table action successfully executed."),
+        Err(e) => return Err(e.into()), // Stellen Sie sicher, dass der Fehler in einen geeigneten Typ konvertiert wird.
+    }        
+    Ok(())
+}
+
 async fn init_table(database_url:String) -> Result<(), Error> {
     // Connect to the database
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
@@ -185,9 +236,6 @@ async fn show_todo_table(database_url: String) -> Result<(), Error> {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let url = get_database_url();
-
-    insert_value_in_table(url.clone()).await?;
-    show_todo_table(url.clone()).await?;
-
+    todo_table_action(url, todo_table_action::show);
     Ok(())
 }
