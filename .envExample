@@ -1,0 +1,4 @@
+DB_HOST="Your postgres host adress"
+DB_USER="Your definded user"
+DB_NAME="Your db name"
+DB_PASSWORD="Your db password"
