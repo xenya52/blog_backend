@@ -1,4 +1,4 @@
-use todo_database::{todo_table_actions, executions, routes};
+use todo_database::{executions, routes, todo_table_actions, todotable_to_jsonstring};
 use tokio_postgres::Error;
 use dotenv::dotenv;
 use std::env;
@@ -18,11 +18,12 @@ fn get_database_url() -> String {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let url = get_database_url();
-    let _ = executions(url, todo_table_actions::Insert).await;
+    //todotable_to_jsonstring(url);
+    let test = executions(url, todo_table_actions::Insert).await;
+    println!("{:?}", test);
+    // let routes = routes();
 
-    let routes = routes();
-
-    println!("Server started at http://localhost:8000");
-    warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;
+    // println!("Server started at http://localhost:8000");
+    // warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;
     Ok(())
 }

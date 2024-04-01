@@ -73,8 +73,11 @@ pub async fn executions(database_url:String, action: todo_table_actions) -> Resu
                     println!("{}", todo);
                 }
                 println!("-====<!!!!!!>====-");
+                Ok(())
             },
-        Err(e) => println!("{:?}", e)
+        Err(e) => {
+            println!("{:?}", e);
+            Err(e)
+        }
     }
-    Ok(())
 }
