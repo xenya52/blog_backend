@@ -10,7 +10,7 @@ pub enum todo_table_actions {
     Delete,
     Merge,
 }
-pub async fn executions(database_url:String, action: todo_table_actions) -> Result<(), Error> {
+pub async fn executions(database_url:String, action: todo_table_actions) -> Result<Vec<Todo>, Error> {
     // Connect to the database
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
     //Test conection
@@ -64,16 +64,18 @@ pub async fn executions(database_url:String, action: todo_table_actions) -> Resu
                     &[],
                 )
                 .await?;
-                for row in rows {
-                    let todo = Todo {
-                        id: row.get(0),
-                        name: row.get(1),
-                        description: row.get(2),
-                    };
-                    println!("{}", todo);
-                }
-                println!("-====<!!!!!!>====-");
-                Ok(())
+            let mut stuff: Vec<Todo> = vec![];
+            for row in rows {
+                let todo = Todo {
+                    id: row.get(0),
+                    name: row.get(1),
+                    description: row.get(2),
+                };
+                stuff.push(todo.clone());
+                println!("{}", todo);
+            }
+            println!("-====<!!!!!!>====-");
+                Ok(stuff)
             },
         Err(e) => {
             println!("{:?}", e);
