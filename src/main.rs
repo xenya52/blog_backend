@@ -1,8 +1,10 @@
 use todo_database::{executions, todo_table_actions, Todo};
-use tokio_postgres::Error;
 use axum::{body::Body, http::{Response, StatusCode}, response::IntoResponse, routing::{get, post}, Json, Router};
 use dotenv::dotenv;
 use std::env;
+
+use tower_http::cors::{Any, CorsLayer};
+use http::Method;
 
 fn get_database_url() -> String {
     
@@ -39,15 +41,21 @@ pub async fn create_todo_response() -> impl IntoResponse{
 
 #[tokio::main]
 async fn main() {
-    let ip_address = "0.0.0.0:8000";
+    let cors = CorsLayer::new()
+        // allow any headers
+        .allow_headers(AllowOrigin::any())
+        // allow `POST` when accessing the resource
+        .allow_methods(Any)
+        // allow requests from below origins
+        .allow_origin(Any);
+
     let app = Router::new()
-       
-        .route("/create_todo_response", post(create_todo_response))
-        .route("/get_todos_as_json", get(get_todos_as_json));
+    .route("/", get(get_todos_as_json))
+    .layer(cors);
 
-    println!("server running on http://localhost:8000");
-
-    axum::Server::bind(&ip_address.parse().unwrap())
+    println!("Running on http://localhost:8000");
+    // Start Server
+    axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
