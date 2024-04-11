@@ -1,10 +1,7 @@
 use todo_database::{executions, todo_table_actions, Todo};
-use axum::{body::Body, http::{Response, StatusCode}, response::IntoResponse, routing::{get, post}, Json, Router};
+use axum::{body::Body, http::{Response, StatusCode, HeaderMap}, response::IntoResponse, routing::{get, post}, Json, Router};
 use dotenv::dotenv;
 use std::env;
-
-use tower_http::cors::{Any, CorsLayer};
-use http::Method;
 
 fn get_database_url() -> String {
     
@@ -35,23 +32,15 @@ async fn get_todos_as_json() -> Json<Vec<Todo>> {
 pub async fn create_todo_response() -> impl IntoResponse{
     Response::builder()
     .status(StatusCode::CREATED)
+    .header("Access-Control-Allow-Origin", "*")
     .body(Body::from("todo created successfully"))
     .unwrap()
 }
 
 #[tokio::main]
 async fn main() {
-    let cors = CorsLayer::new()
-        // allow any headers
-        .allow_headers(AllowOrigin::any())
-        // allow `POST` when accessing the resource
-        .allow_methods(Any)
-        // allow requests from below origins
-        .allow_origin(Any);
-
     let app = Router::new()
-    .route("/", get(get_todos_as_json))
-    .layer(cors);
+    .route("/", get(get_todos_as_json));
 
     println!("Running on http://localhost:8000");
     // Start Server
