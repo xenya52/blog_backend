@@ -1,15 +1,21 @@
+use warp::Filter;
 
-//restapi test
+use serde::{Deserialize, Serialize};
 
-// pub async fn get_post(id: i32) -> Result<impl warp::Reply, warp::Rejection> {
-//     let url = get_database_url();
-//     let result = executions(url, todo_table_actions::Show).await;
-//     let mut database_content: Vec<Todo> = vec![];
-    
-//     match result {
-//         Ok(stuff) => database_content = stuff,
-//         Err(e) => panic!("{}", e),
-//     }
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Post {
+    pub id: u64,
+    pub title: String,
+    pub body: String,
+}
 
-//     Ok(warp::reply::json(&database_content))
-// }
+// A function to handle GET requests at /posts/{id}
+pub async fn get_post(id: u64) -> Result<impl warp::Reply, warp::Rejection> {
+    // For simplicity, let's say we are returning a static post
+    let post = Post {
+        id,
+        title: String::from("Hello, Warp!"),
+        body: String::from("This is a post about Warp."),
+    };
+    Ok(warp::reply::json(&post))
+}
