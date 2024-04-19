@@ -1,5 +1,5 @@
 use tokio_postgres::{NoTls, Error};
-use crate::Todo;
+use crate::models::todo::Todo;
 
 pub enum todo_table_actions {
     Show,
@@ -10,7 +10,7 @@ pub enum todo_table_actions {
     Delete,
     Merge,
 }
-pub async fn executions(database_url:String, action: todo_table_actions) -> Result<Vec<Todo>, Error> {
+pub async fn sqlExecutions(database_url:String, action: todo_table_actions) -> Result<Vec<Todo>, Error> {
     // Connect to the database
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
     //Test conection
@@ -70,6 +70,7 @@ pub async fn executions(database_url:String, action: todo_table_actions) -> Resu
                     id: row.get(0),
                     name: row.get(1),
                     description: row.get(2),
+                    checked: false
                 };
                 stuff.push(todo.clone());
                 println!("{}", todo);
