@@ -1,5 +1,21 @@
-use tokio_postgres::{NoTls, Error};
 use crate::models::todo::Todo;
+use postgres::{Client, Error, NoTls};
+use dotenv::dotenv;
+use std::env;
+
+//todo!!!
+fn get_database_url() -> String {
+
+    dotenv().ok();
+    let database_url = format!(
+        "host={} user={} dbname={} password={}",
+        env::var("DB_HOST").expect("DB_HOST must be set"),
+        env::var("DB_USER").expect("DB_USER must be set"),
+        env::var("DB_NAME").expect("DB_NAME must be set"),
+        env::var("DB_PASSWORD").expect("DB_PASSWORD must be set"),
+    );
+    database_url
+}
 
 pub enum todo_table_actions {
     Show,
@@ -10,17 +26,11 @@ pub enum todo_table_actions {
     Delete,
     Merge,
 }
-pub async fn sqlExecutions(database_url:String, action: todo_table_actions) -> Result<Vec<Todo>, Error> {
+pub async fn sqlExecutions(action: todo_table_actions) -> Result<Vec<Todo>, Error> {
     // Connect to the database
-    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
-    //Test conection
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
+    let mut client = Client::connect(&get_database_url(), NoTls)?;
 
-    let mut executable_string: &str = "";
+    let mut executable_string: &str;
     match action {
         todo_table_actions::Show => executable_string = "
             SELECT * FROM todo 
@@ -49,21 +59,16 @@ pub async fn sqlExecutions(database_url:String, action: todo_table_actions) -> R
             WHERE id=10
         "
     }
+
     println!("Execute table action...");
-    let action_result = client.execute(
-        executable_string,
-        &[],
-    )
-    .await;
-    match action_result {
-        Ok(_) => {
+    let result = match client.query(executable_string, &[]) {
+        Ok(stuff) => {
             println!("-====<!Done!>====-");
-            let rows = client
+            let rows: Vec<postgres::Row> = client
                 .query(
                     "SELECT * FROM todo",
                     &[],
-                )
-                .await?;
+                )?;
             let mut stuff: Vec<Todo> = vec![];
             for row in rows {
                 let todo = Todo {
@@ -76,11 +81,13 @@ pub async fn sqlExecutions(database_url:String, action: todo_table_actions) -> R
                 println!("{}", todo);
             }
             println!("-====<!!!!!!>====-");
-                Ok(stuff)
+            Ok(stuff)
             },
         Err(e) => {
             println!("{:?}", e);
             Err(e)
         }
-    }
+    };
+
+    result
 }

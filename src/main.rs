@@ -3,6 +3,7 @@ extern crate rocket;
 
 mod api;
 mod models;
+mod postgresql;
 
 #[launch]
 fn server() -> _ {
