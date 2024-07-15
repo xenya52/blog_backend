@@ -4,15 +4,15 @@ use mongodb::{bson::{doc, oid::ObjectId, to_bson}, Client, Collection};
 
 use crate::model::BlogContent;
 
-const DB_NAME: &str = "teste";
-const COLL_NAME: &str = "users";
+const DB_NAME: &str = "lucy-hobby-blog-db";
+const COLL_NAME: &str = "debug-collection";
 
 #[post("/")]
 async fn add_blog_content(client: web::Data<Client>, form: web::Json<BlogContent>) -> HttpResponse {
     let collection = client.database(DB_NAME).collection(COLL_NAME);
     let result = collection.insert_one(form.into_inner(), None).await;
     match result {
-        Ok(_) => HttpResponse::Ok().body("user added"),
+        Ok(_) => HttpResponse::Ok().body("BlogContent added"),
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
@@ -42,9 +42,9 @@ async fn get_blog_content(client: web::Data<Client>, id: web::Path<String>) -> H
     let result = collection.find_one(doc! {"_id": &object_id}, None).await;
 
     match result {
-        Ok(Some(user)) => HttpResponse::Ok().json(user),
+        Ok(Some(blog_content)) => HttpResponse::Ok().json(blog_content),
         Ok(None) => {
-            HttpResponse::NotFound().body(format!("No user found with id {id}"))
+            HttpResponse::NotFound().body(format!("No blog_content found with id {id}"))
         }
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
