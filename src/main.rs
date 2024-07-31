@@ -20,9 +20,15 @@ async fn main() -> std::io::Result<()> {
 
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
-    HttpServer::new(||App::new().service(greet))
+    HttpServer::new(move || {
+        App::new()
+            .app_data(Data::new(client.clone()))
+            .service(greet)
+    })
     .bind((host, port))?
     .workers(2)
     .run()
     .await
 }
+
+// current tutorial = https://www.youtube.com/watch?v=4Q7FAMydzOU
