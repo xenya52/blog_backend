@@ -3,6 +3,7 @@ mod controller;
 
 use actix_web::web::Data;
 use actix_web::{App, HttpServer, Responder, get};
+use controller::BlogContent::get_all_blog_content;
 use mongodb::Client;
 use dotenv::dotenv;
 
@@ -24,6 +25,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(Data::new(client.clone()))
             .service(greet)
+            .service(get_all_blog_content)
     })
     .bind((host, port))?
     .workers(2)

@@ -8,7 +8,7 @@ const DB_NAME: &str = "lucy-hobby-blog-db";
 const COLL_NAME: &str = "debug-collection";
 
 #[post("/")]
-async fn add_blog_content(client: web::Data<Client>, form: web::Json<BlogContent>) -> HttpResponse {
+pub async fn add_blog_content(client: web::Data<Client>, form: web::Json<BlogContent>) -> HttpResponse {
     let collection = client.database(DB_NAME).collection(COLL_NAME);
     let result = collection.insert_one(form.into_inner(), None).await;
     match result {
