@@ -3,7 +3,7 @@ mod controller;
 
 use actix_web::web::Data;
 use actix_web::{App, HttpServer, Responder, get};
-use controller::BlogContent::get_all_blog_content;
+use controller::blog_contentt::get_all_blog_content;
 use mongodb::Client;
 use dotenv::dotenv;
 

@@ -1,1 +1,1 @@
-pub mod BlogContent;
+pub mod blog_contentt;
